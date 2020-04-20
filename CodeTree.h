@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <stdexcept>
 
 class CodeTree{
 public:
@@ -10,10 +11,12 @@ public:
 
         //line of code
         class Node{
+        private:
             std::string line;
             Node* next;
             LinkedList* children;
 
+        public:
             //Constructor + Big 3
             Node();
             Node(const std::string& line_);
@@ -27,13 +30,17 @@ public:
             void updateLine(std::string newLine);
 
             //accessors
-            std::string getLine() const;
+            std::string& getLine() const;
             Node* getNext() const;
             LinkedList* getChildren() const;
         };
+
     private:
+        Node* tail;
         Node* head;
         unsigned int size;
+
+        void copyVars(const LinkedList& other);
 
     public:
         //Constructor + Big 3
@@ -43,8 +50,8 @@ public:
         ~LinkedList();
 
         //Accessors
-        Node* head();
-        const Node* Head() const;
+        Node* getTail();
+        const Node* getTail() const;
 
         //Insertion
         void Addhead(const std::string& line);
