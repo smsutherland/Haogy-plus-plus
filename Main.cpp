@@ -1,17 +1,18 @@
+#include "CodeTree.h"
 #include "function.h"
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 
-std::vector<std::string> createProgram(std::ifstream& file);
-void executeProgram(std::vector<std::string>& program);
-void findFunctions(std::vector<std::string>& program, std::vector<function>& functionsOut);
+CodeTree* createProgram(std::ifstream& file);
+void trim(std::string& str);
+void executeProgram(CodeTree& program);
 
 int main(int argc, char** argv){
     std::string filename = "";
     if (argc == 1){
-        std::cout << "__LANGUAGENAME__ interpreter by Sagan Sutherland" << std::endl;
+        std::cout << "Haogy++ interpreter by Sagan Sutherland" << std::endl;
         return 0;
     }
 
@@ -22,43 +23,55 @@ int main(int argc, char** argv){
         std::cout << "bad filename" << std::endl;
         return 0;
     }
-    std::vector<std::string> program = createProgram(progFile);
+    CodeTree* program = createProgram(progFile);
     progFile.close();
 
-    executeProgram(program);
+    std::cout << "Program:" << std::endl;
+    program->print();
+    delete program;
+    //executeProgram(*program);
     return 0;
 }
 
-std::vector<std::string> createProgram(std::ifstream& progFile){
-    std::vector<std::string> program;
+CodeTree* createProgram(std::ifstream& progFile){
+    CodeTree* program = new CodeTree();
     if(progFile.is_open()){
         std::string line;
         while(std::getline(progFile, line)){
-            if(line != "")
-                program.push_back(line);
+            //TODO: renove comments
+            trim(line);
+            if(line != ""){ //it's not all whitespace
+                std::string errorMsg = program->addLine(line);
+                if(errorMsg != ""){
+                    std::cout << errorMsg << std::endl;
+                    delete program;
+                    program = nullptr;
+                    break;
+                }
+            }
         }
     }
     return program;
 }
 
-void executeProgram(std::vector<std::string>& program){
+void trim(std::string& str){
+    std::string whitespace = " \t\n\v\f\r";
+    int startPos = 0;
+    for(; whitespace.find(str[startPos]) != std::string::npos && startPos < str.length(); startPos++){}
+    int endPos = str.length() - 1;
+    for(; whitespace.find(str[endPos]) != std::string::npos && endPos >= 0; endPos--){}
+    int length = endPos - startPos + 1;
+    if(length <= 0)
+        str = "";
+    else
+        str = str.substr(startPos, length);
+}
+
+void executeProgram(CodeTree& program){
     std::vector<std::string> types;
     types.push_back("boolean");
     types.push_back("int");
     types.push_back("float");
     types.push_back("char");
     types.push_back("string");
-
-    std::vector<function> functions;
-    findFunctions(program, functions);
-
-    
-}
-
-void findFunctions(std::vector<std::string>& program, std::vector<function>& functionsOut){
-    for(std::string line : program){
-        if(!(line.rfind(" ", 0) || line.rfind("\t"))){
-            
-        }
-    }
 }
