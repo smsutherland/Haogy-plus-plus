@@ -1,3 +1,4 @@
 *.exe
 thing.txt
 .vscode
+*gch

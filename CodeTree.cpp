@@ -97,6 +97,40 @@ CodeTree::LinkedList* CodeTree::updateEnd(){
     return end;
 }
 
+CodeTree* CodeTree::createProgram(std::ifstream& progFile){
+    CodeTree* program = new CodeTree();
+    if(progFile.is_open()){
+        std::string line;
+        while(std::getline(progFile, line)){
+            //TODO: remove comments
+            trim(line);
+            if(line != ""){ //it's not all whitespace
+                std::string errorMsg = program->addLine(line);
+                if(errorMsg != ""){
+                    std::cout << errorMsg << std::endl;
+                    delete program;
+                    program = nullptr;
+                    break;
+                }
+            }
+        }
+    }
+    return program;
+}
+
+void CodeTree::trim(std::string& str){
+    std::string whitespace = " \t\n\v\f\r";
+    int startPos = 0;
+    for(; whitespace.find(str[startPos]) != std::string::npos && startPos < str.length(); startPos++){}
+    int endPos = str.length() - 1;
+    for(; whitespace.find(str[endPos]) != std::string::npos && endPos >= 0; endPos--){}
+    int length = endPos - startPos + 1;
+    if(length <= 0)
+        str = "";
+    else
+        str = str.substr(startPos, length);
+}
+
 //LinkedList functions
 
 CodeTree::LinkedList::LinkedList(){

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
+#include <fstream>
 
 class CodeTree{
 public:
@@ -88,6 +89,10 @@ private:
     void copyVars(const CodeTree& other);
     static int getLineType(std::string& line);
     LinkedList* updateEnd();
+    static void trim(std::string& str);
+
+    //returns error messages with creating the CodeTree
+    std::string addLine(std::string line);
 
 public:
     CodeTree();
@@ -98,7 +103,7 @@ public:
     LinkedList& startList() const;
     unsigned int getSize() const;
 
-    //returns error messages with creating the CodeTree
-    std::string addLine(std::string line);
+
     void print();
+    static CodeTree* createProgram(std::ifstream& progFile);
 };
