@@ -45,8 +45,8 @@ public:
         };
 
     private:
-        Node* tail;
         Node* head;
+        Node* tail;
         Node* parent;
         unsigned int size;
 
@@ -61,15 +61,15 @@ public:
         ~LinkedList();
 
         //Accessors
-        Node* getTail();
-        const Node* getTail() const;
         Node* getHead();
         const Node* getHead() const;
+        Node* getTail();
+        const Node* getTail() const;
         Node* getParent();
         const Node* getParent() const;
 
         //Insertion
-        void Addhead(const std::string& line);
+        void AddTail(const std::string& line);
 
         //Removal
         void Clear();

@@ -38,12 +38,12 @@ unsigned int CodeTree::getSize() const{
 std::string CodeTree::addLine(std::string line){
     int lineType = getLineType(line);
     if(lineType == 0){
-        end->Addhead(line);
+        end->AddTail(line);
         size++;
     }else if(lineType > 0){
-        end->Addhead(line);
-        end->getHead()->giveChildren();
-        end = end->getHead()->getChildren();
+        end->AddTail(line);
+        end->getTail()->giveChildren();
+        end = end->getTail()->getChildren();
         size++;
     }else{
         for(int i = 0; i > lineType; i--){
@@ -84,9 +84,9 @@ CodeTree::LinkedList* CodeTree::updateEnd(){
     
     end = start;
     while(true){
-        if(end->getHead() != nullptr){
-            if(end->getHead()->getChildren() != nullptr){
-                end = end->getHead()->getChildren();
+        if(end->getTail() != nullptr){
+            if(end->getTail()->getChildren() != nullptr){
+                end = end->getTail()->getChildren();
             }else{
                 break;
             }
@@ -119,6 +119,9 @@ CodeTree* CodeTree::createProgram(std::ifstream& progFile){
 }
 
 void CodeTree::trim(std::string& str){
+    if (str == "")
+        return;
+
     std::string whitespace = " \t\n\v\f\r";
     int startPos = 0;
     for(; whitespace.find(str[startPos]) != std::string::npos && startPos < str.length(); startPos++){}
@@ -134,7 +137,7 @@ void CodeTree::trim(std::string& str){
 //LinkedList functions
 
 CodeTree::LinkedList::LinkedList(){
-    tail = head = parent = nullptr;
+    head = tail = parent = nullptr;
     size = 0;
 }
 
@@ -143,7 +146,7 @@ CodeTree::LinkedList::LinkedList(const LinkedList& other){
 }
 
 CodeTree::LinkedList::LinkedList(Node* parent_){
-    tail = head = nullptr;
+    head = tail = nullptr;
     parent = parent_;
     size = 0;
 }
@@ -158,31 +161,23 @@ CodeTree::LinkedList& CodeTree::LinkedList::operator=(const LinkedList& rhs){
 void CodeTree::LinkedList::copyVars(const LinkedList& other){
     size = other.size;
     if(size > 0){
-        tail = new Node(*other.tail);
+        head = new Node(*other.head);
 
-        head = tail;
-        Node* otherCurrentNode = other.tail;
+        tail = head;
+        Node* otherCurrentNode = other.head;
         for(int i = 0; i < size; i++){
-            head->updateNext(new Node(*otherCurrentNode->getNext()));
-            head = head->getNext();
+            tail->updateNext(new Node(*otherCurrentNode->getNext()));
+            tail = tail->getNext();
             otherCurrentNode = otherCurrentNode->getNext();
         }
     }else{
-        head = tail = nullptr;
+        tail = head = nullptr;
     }
     parent = other.parent;
 }
 
 CodeTree::LinkedList::~LinkedList(){
     Clear();
-}
-
-CodeTree::LinkedList::Node* CodeTree::LinkedList::getTail(){
-    return tail;
-}
-
-const CodeTree::LinkedList::Node* CodeTree::LinkedList::getTail() const{
-    return tail;
 }
 
 CodeTree::LinkedList::Node* CodeTree::LinkedList::getHead(){
@@ -193,6 +188,14 @@ const CodeTree::LinkedList::Node* CodeTree::LinkedList::getHead() const{
     return head;
 }
 
+CodeTree::LinkedList::Node* CodeTree::LinkedList::getTail(){
+    return tail;
+}
+
+const CodeTree::LinkedList::Node* CodeTree::LinkedList::getTail() const{
+    return tail;
+}
+
 CodeTree::LinkedList::Node* CodeTree::LinkedList::getParent(){
     return parent;
 }
@@ -201,32 +204,27 @@ const CodeTree::LinkedList::Node* CodeTree::LinkedList::getParent() const{
     return parent;
 }
 
-void CodeTree::LinkedList::Addhead(const std::string& line){
+void CodeTree::LinkedList::AddTail(const std::string& line){
     if(size > 0){
-        head->updateNext(new Node(line, this));
-        head = head->getNext();
+        tail->updateNext(new Node(line, this));
+        tail = tail->getNext();
     }else{
-        head = tail = new Node(line, this);
+        tail = head = new Node(line, this);
     }
     size++;
 }
 
 void CodeTree::LinkedList::Clear(){
-    Node* currentNode = tail;
-    for(int i = 0; i < size; i++){
-        Node* nextNode = tail->getNext();
-        delete currentNode;
-        currentNode = nextNode;
-    }
+    delete head;
     size = 0;
-    head = tail = parent = nullptr;
+    tail = head = parent = nullptr;
 }
 
 const std::string& CodeTree::LinkedList::operator[](unsigned int index) const{
     if(index >= size)
         throw std::out_of_range("This index is out of range for this code block");
     
-    Node* currentNode = tail;
+    Node* currentNode = head;
     for(int i = 0; i < index; i++){
         currentNode = currentNode->getNext();
     }
@@ -237,7 +235,7 @@ std::string CodeTree::LinkedList::operator[](unsigned int index){
     if(index >= size)
         throw std::out_of_range("This index is out of range for this code block");
     
-    Node* currentNode = tail;
+    Node* currentNode = head;
     for(int i = 0; i < index; i++){
         currentNode = currentNode->getNext();
     }
@@ -245,7 +243,7 @@ std::string CodeTree::LinkedList::operator[](unsigned int index){
 }
 
 void CodeTree::LinkedList::print(unsigned int indent){
-    Node* currentNode = tail;
+    Node* currentNode = head;
     while(currentNode != nullptr){
         currentNode->print(indent);
         currentNode = currentNode->getNext();
