@@ -3,7 +3,7 @@
 //CodeTree functions
 
 CodeTree::CodeTree(){
-    end = start = new LinkedList();
+    endList = startList = new LinkedList();
     size = 0;
 }
 
@@ -12,23 +12,23 @@ CodeTree::CodeTree(const CodeTree& other){
 }
 
 CodeTree& CodeTree::operator=(const CodeTree& rhs){
-    delete start;
+    delete startList;
     copyVars(rhs);
     return *this;
 }
 
 void CodeTree::copyVars(const CodeTree& other){
     size = other.size;
-    start = new LinkedList(*other.start);
+    startList = new LinkedList(*other.startList);
     updateEnd();
 }
 
 CodeTree::~CodeTree(){
-    delete start;
+    delete startList;
 }
 
-CodeTree::LinkedList& CodeTree::startList() const{
-    return *start;
+CodeTree::LinkedList& CodeTree::getStartList() const{
+    return *startList;
 }
 
 unsigned int CodeTree::getSize() const{
@@ -38,25 +38,25 @@ unsigned int CodeTree::getSize() const{
 std::string CodeTree::addLine(std::string line){
     int lineType = getLineType(line);
     if(lineType == 0){
-        end->AddTail(line);
+        endList->AddTail(line);
         size++;
     }else if(lineType > 0){
-        end->AddTail(line);
-        end->getTail()->giveChildren();
-        end = end->getTail()->getChildren();
+        endList->AddTail(line);
+        endList->getTail()->giveChildren();
+        endList = endList->getTail()->getChildren();
         size++;
     }else{
         for(int i = 0; i > lineType; i--){
-            if(end == start)
+            if(endList == startList)
                 return "Too many closing brackets";
-            end = end->getParent()->getContainer();
+            endList = endList->getParent()->getContainer();
         }
     }
     return "";
 }
 
 void CodeTree::print(){
-    start->print(0);
+    startList->print(0);
 }
 
 //0= regular line
@@ -68,7 +68,7 @@ int CodeTree::getLineType(std::string& line){
         return 1;
     
     bool isDecriment = true;
-    for(int i = 0; i < line.length(); i++){
+    for(unsigned int i = 0; i < line.length(); i++){
         isDecriment = (line[i] == '}');
         if(!isDecriment)
             break;
@@ -80,13 +80,13 @@ int CodeTree::getLineType(std::string& line){
 
 CodeTree::LinkedList* CodeTree::updateEnd(){
     if(size == 0)
-        return end = nullptr;
+        return endList = nullptr;
     
-    end = start;
+    endList = startList;
     while(true){
-        if(end->getTail() != nullptr){
-            if(end->getTail()->getChildren() != nullptr){
-                end = end->getTail()->getChildren();
+        if(endList->getTail() != nullptr){
+            if(endList->getTail()->getChildren() != nullptr){
+                endList = endList->getTail()->getChildren();
             }else{
                 break;
             }
@@ -94,7 +94,7 @@ CodeTree::LinkedList* CodeTree::updateEnd(){
             break;
         }
     }
-    return end;
+    return endList;
 }
 
 CodeTree* CodeTree::createProgram(std::ifstream& progFile){
@@ -134,6 +134,14 @@ void CodeTree::trim(std::string& str){
         str = str.substr(startPos, length);
 }
 
+CodeTree::Iterator CodeTree::begin() {
+    return Iterator(startList->getHead());
+}
+
+CodeTree::Iterator CodeTree::end() {
+    return Iterator();
+}
+
 //LinkedList functions
 
 CodeTree::LinkedList::LinkedList(){
@@ -152,7 +160,7 @@ CodeTree::LinkedList::LinkedList(Node* parent_){
 }
 
 CodeTree::LinkedList& CodeTree::LinkedList::operator=(const LinkedList& rhs){
-    Clear();
+    clear();
 
     copyVars(rhs);
     return *this;
@@ -177,7 +185,7 @@ void CodeTree::LinkedList::copyVars(const LinkedList& other){
 }
 
 CodeTree::LinkedList::~LinkedList(){
-    Clear();
+    clear();
 }
 
 CodeTree::LinkedList::Node* CodeTree::LinkedList::getHead(){
@@ -214,7 +222,7 @@ void CodeTree::LinkedList::AddTail(const std::string& line){
     size++;
 }
 
-void CodeTree::LinkedList::Clear(){
+void CodeTree::LinkedList::clear(){
     delete head;
     size = 0;
     tail = head = parent = nullptr;
@@ -236,7 +244,7 @@ std::string CodeTree::LinkedList::operator[](unsigned int index){
         throw std::out_of_range("This index is out of range for this code block");
     
     Node* currentNode = head;
-    for(int i = 0; i < index; i++){
+    for(unsigned int i = 0; i < index; i++){
         currentNode = currentNode->getNext();
     }
     return currentNode->getLine();
@@ -327,13 +335,69 @@ CodeTree::LinkedList* CodeTree::LinkedList::Node::getContainer() const{
 }
 
 void CodeTree::LinkedList::Node::print(unsigned int indent){
-    for(int i = 0; i < indent; i++)
+    for(unsigned int i = 0; i < indent; i++)
         std::cout << '\t';
     std::cout << line << std::endl;
     if(children != nullptr){
         children->print(indent + 1);
         for(int i = 0; i < indent; i++)
             std::cout << '\t';
-            std::cout << '}' << std::endl;
+        std::cout << '}' << std::endl;
     }
+}
+
+//Iterator functions
+
+CodeTree::Iterator::Iterator(CodeTree::LinkedList::Node* startingNode) {
+    currentNode = startingNode;
+}
+
+bool CodeTree::Iterator::moveForward() {
+    if (currentNode->getNext() != nullptr) {
+        currentNode = currentNode->getNext();
+        return true;
+    }
+    return false;
+}
+
+bool CodeTree::Iterator::moveUp() {
+    if (currentNode->getContainer()->getParent() != nullptr) {
+        currentNode = currentNode->getContainer()->getParent();
+        return true;
+    }
+    return false;
+}
+
+bool CodeTree::Iterator::moveDown() {
+    if (currentNode->getChildren() != nullptr) {
+        currentNode = currentNode->getChildren()->getHead();
+        return true;
+    }
+    return false;
+}
+
+bool CodeTree::Iterator::nextLine() {
+    if (currentNode->getLine() == "hii()") {
+        std::cout << "";
+    }
+    if (moveDown()) {
+        return true;
+    }
+    while (true) {
+        if (moveForward()) {
+            return true;
+        }
+        if (!moveUp()) {
+            currentNode = nullptr;
+            return false;
+        }
+    }
+}
+
+bool CodeTree::Iterator::blockHead() {
+    return moveUp();
+}
+
+const std::string& CodeTree::Iterator::operator*() {
+    return currentNode->getLine();
 }

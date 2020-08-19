@@ -1,4 +1,8 @@
 *.exe
-thing.txt
+thing.hgy
 .vscode
+.vs
+*.sln
+*.vcxproj*
+Debug/
 *gch

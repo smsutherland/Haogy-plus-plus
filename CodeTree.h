@@ -72,7 +72,7 @@ public:
         void AddTail(const std::string& line);
 
         //Removal
-        void Clear();
+        void clear();
 
         //Operators
         const std::string& operator[](unsigned int intex) const;
@@ -81,9 +81,27 @@ public:
         void print(unsigned int indent);
     };
 
+    class Iterator {
+    private:
+        LinkedList::Node* currentNode;
+
+        bool moveForward();
+        bool moveUp();
+        bool moveDown();
+    public:
+        Iterator(LinkedList::Node* startingNode = nullptr);
+        
+        bool nextLine(); // Goes to the next line. Moves up a level if at the end of a block.
+        bool blockHead(); //Goes to the head of the code block.
+
+        const std::string& operator*();
+        bool operator==(const Iterator other) { return currentNode == other.currentNode; }
+        bool operator!=(const Iterator other) { return currentNode != other.currentNode; }
+    };
+
 private:
-    LinkedList* start;
-    LinkedList* end;
+    LinkedList* startList;
+    LinkedList* endList;
     unsigned int size;
 
     void copyVars(const CodeTree& other);
@@ -100,10 +118,13 @@ public:
     CodeTree& operator=(const CodeTree& rhs);
     ~CodeTree();
 
-    LinkedList& startList() const;
+    LinkedList& getStartList() const;
     unsigned int getSize() const;
 
 
     void print();
     static CodeTree* createProgram(std::ifstream& progFile);
+
+    Iterator begin();
+    Iterator end();
 };
