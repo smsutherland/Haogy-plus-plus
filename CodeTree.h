@@ -1,130 +1,64 @@
-#pragma once
+#pragma	once
 #include <iostream>
 #include <string>
-#include <stdexcept>
+#include <stack>
 #include <fstream>
+#include "utility.h"
 
-class CodeTree{
-public:
-
-    //block of code
-    class LinkedList{
-    public:
-
-        //line of code
-        class Node{
-        private:
-            std::string line;
-            Node* next;
-            LinkedList* children;
-            LinkedList* container;
-
-        public:
-            //Constructor + Big 3
-            Node();
-            Node(const std::string& line_);
-            Node(const std::string& line_, Node* next_);
-            Node(const std::string& line_, LinkedList* container_);
-            Node(const Node& other);
-            Node& operator=(const Node& rhs);
-            ~Node();
-
-            //updating functions
-            void updateNext(Node* newPointer);
-            void updateLine(const std::string newLine);
-            void setContainer(LinkedList* container_);
-            bool giveChildren();
-
-            //accessors
-            const std::string& getLine() const;
-            Node* getNext() const;
-            LinkedList* getChildren() const;
-            LinkedList* getContainer() const;
-
-            void print(unsigned int indent);
-        };
-
-    private:
-        Node* head;
-        Node* tail;
-        Node* parent;
-        unsigned int size;
-
-        void copyVars(const LinkedList& other);
-
-    public:
-        //Constructor + Big 3
-        LinkedList();
-        LinkedList(const LinkedList& other);
-        LinkedList(Node* parent_);
-        LinkedList& operator=(const LinkedList& rhs);
-        ~LinkedList();
-
-        //Accessors
-        Node* getHead();
-        const Node* getHead() const;
-        Node* getTail();
-        const Node* getTail() const;
-        Node* getParent();
-        const Node* getParent() const;
-
-        //Insertion
-        void AddTail(const std::string& line);
-
-        //Removal
-        void clear();
-
-        //Operators
-        const std::string& operator[](unsigned int intex) const;
-        std::string operator[](unsigned int index);
-
-        void print(unsigned int indent);
-    };
-
-    class Iterator {
-    private:
-        LinkedList::Node* currentNode;
-
-        bool moveForward();
-        bool moveUp();
-        bool moveDown();
-    public:
-        Iterator(LinkedList::Node* startingNode = nullptr);
-        
-        bool nextLine(); // Goes to the next line. Moves up a level if at the end of a block.
-        bool blockHead(); //Goes to the head of the code block.
-
-        const std::string& operator*();
-        bool operator==(const Iterator other) { return currentNode == other.currentNode; }
-        bool operator!=(const Iterator other) { return currentNode != other.currentNode; }
-    };
-
+class CodeTree {
 private:
-    LinkedList* startList;
-    LinkedList* endList;
-    unsigned int size;
+	struct Node {
+		std::string line;
+		CodeTree* child;
 
-    void copyVars(const CodeTree& other);
-    static int getLineType(std::string& line);
-    LinkedList* updateEnd();
-    static void trim(std::string& str);
 
-    //returns error messages with creating the CodeTree
-    std::string addLine(std::string line);
+		Node(std::string line_ = "");
+		Node(const Node& other);
+		Node& operator=(const Node& rhs);
+		~Node();
+
+		void giveChild();
+		void resetChildsHeader();
+	};
+
+	class ArrayBlock {
+	private:
+		Node* nodeArray;
+		unsigned int size;
+		unsigned int capacity;
+
+		void resetNodeChildrensHeaders();
+
+		void setCapacity(unsigned int newCapacity);
+		void doubleCapacity() { setCapacity(capacity * 2); }
+
+	public:
+		ArrayBlock();
+		ArrayBlock(const ArrayBlock& other);
+		ArrayBlock& operator=(const ArrayBlock& rhs);
+		~ArrayBlock();
+
+		void shrinkToFit() { setCapacity(size); }
+
+		unsigned int getSize();
+
+		Node& operator[](unsigned int index);
+		void pushBack(std::string line);
+		Node& back();
+	};
+
+	Node* header;
+	ArrayBlock body;
+
+	void setHeader(Node* newParent);
+	Node* getHeader();
+	void addLine(std::string line, std::stack<CodeTree*>& bottom);
 
 public:
-    CodeTree();
-    CodeTree(const CodeTree& other);
-    CodeTree& operator=(const CodeTree& rhs);
-    ~CodeTree();
+	CodeTree(Node* header_ = nullptr);
 
-    LinkedList& getStartList() const;
-    unsigned int getSize() const;
+	static CodeTree* createTree(std::ifstream& progFile);
 
-
-    void print();
-    static CodeTree* createProgram(std::ifstream& progFile);
-
-    Iterator begin();
-    Iterator end();
+	void print(unsigned int indent = 0);
 };
+

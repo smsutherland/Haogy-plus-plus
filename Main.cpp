@@ -1,11 +1,7 @@
 #include "CodeTree.h"
-#include "function.h"
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <vector>
-
-void executeProgram(CodeTree& program);
 
 int main(int argc, char** argv){
     std::string filename = "";
@@ -21,23 +17,13 @@ int main(int argc, char** argv){
         std::cout << "bad filename" << std::endl;
         return 0;
     }
-    CodeTree* program = CodeTree::createProgram(progFile);
+    CodeTree* program = CodeTree::createTree(progFile);
     progFile.close();
 
     if(program != nullptr){
         std::cout << "Program:" << std::endl;
         program->print();
-        delete program;
     }
-    //executeProgram(*program);
+    delete program;
     return 0;
-}
-
-void executeProgram(CodeTree& program){
-    std::vector<std::string> types;
-    types.push_back("boolean");
-    types.push_back("int");
-    types.push_back("float");
-    types.push_back("char");
-    types.push_back("string");
 }
