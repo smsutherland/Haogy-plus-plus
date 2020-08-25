@@ -54,16 +54,17 @@ CodeTree* CodeTree::createTree(std::ifstream& progFile) {
 }
 
 void CodeTree::print(unsigned int indent) {
-	for (unsigned int i = 0; i < body.getSize(); i++) {
-		for (unsigned int j = 0; j < indent; j++)
+	for (auto itr = this->begin(); itr != this->end(); itr.stepInto()) {
+		for (unsigned int i = 0; i < itr.depth(); i++)
 			std::cout << "\t";
-		Node& currentNode = body[i];
-		std::cout << currentNode.line << std::endl;
-		if (currentNode.child != nullptr) {
-			currentNode.child->print(indent + 1);
-			for (unsigned int j = 0; j < indent; j++)
-				std::cout << "\t";
-			std::cout << "}" << std::endl;
-		}
+		std::cout << *itr << std::endl;
 	}
+}
+
+CodeTree::Iterator CodeTree::begin() {
+	return Iterator(this);
+}
+
+CodeTree::Iterator CodeTree::end() {
+	return Iterator();
 }

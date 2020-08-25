@@ -47,6 +47,27 @@ private:
 		Node& back();
 	};
 
+public:
+	class Iterator {
+	private:
+		std::stack<std::pair<CodeTree*, unsigned int>> history = std::stack<std::pair<CodeTree*, unsigned int>>();
+
+	public:
+		Iterator() {};
+		Iterator(CodeTree* start);
+
+		bool stepOut();
+		bool stepOver();
+		bool stepInto();
+
+		std::string& operator*();
+		unsigned int depth();
+
+		bool operator==(const Iterator& rhs) { return history == rhs.history; };
+		bool operator!=(const Iterator& rhs) { return history != rhs.history; };
+	};
+private:
+
 	Node* header;
 	ArrayBlock body;
 
@@ -60,5 +81,8 @@ public:
 	static CodeTree* createTree(std::ifstream& progFile);
 
 	void print(unsigned int indent = 0);
+
+	Iterator begin();
+	Iterator end();
 };
 
