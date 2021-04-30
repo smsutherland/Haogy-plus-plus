@@ -1,15 +1,19 @@
 #include "utility.h"
 
+bool isWhitespace(char test) {
+    std::string whitespace = " \t\n\v\f\r";
+    return whitespace.find(test) != std::string::npos;
+}
+
 void trim(std::string& str) {
     if (str == "")
         return;
-    std::string whitespace = " \t\n\v\f\r";
 
     unsigned int startPos = 0;
-    for (; whitespace.find(str[startPos]) != std::string::npos && startPos < str.length(); startPos++) {}
+    for (; isWhitespace(str[startPos]) && startPos < str.length(); startPos++) {}
 
     unsigned int endPos = str.length() - 1;
-    for (; whitespace.find(str[endPos]) != std::string::npos && endPos >= 0; endPos--) {}
+    for (; isWhitespace(str[endPos]) && endPos >= 0; endPos--) {}
     
     int length = endPos - startPos + 1;
     if (length <= 0)
