@@ -17,7 +17,7 @@ int main(int argc, char** argv){
         std::cout << "bad filename" << std::endl;
         return 0;
     }
-    CodeTree* program = CodeTree::createTree(progFile);
+    CodeTree<std::string>* program = createTree(progFile);
     progFile.close();
 
     if(program != nullptr){
