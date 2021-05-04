@@ -1,4 +1,5 @@
 #include "CodeTree.h"
+#include "Lexer.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -25,5 +26,13 @@ int main(int argc, char** argv){
         program->print();
     }
     delete program;
+
+    std::string testLine = "abcde123 + asss/ ( a + b )";
+    std::vector<Token> testTokens = tokenizeLine(testLine);
+    for (Token t : testTokens) {
+        std::cout << t.toString() << ", ";
+    }
+    std::cout << std::endl;
+
     return 0;
 }

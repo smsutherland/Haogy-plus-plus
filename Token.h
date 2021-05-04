@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 enum TokenType {
 	None,
 	Integer,
@@ -25,7 +27,7 @@ private:
 
 public:
 	
-	Token();
+	Token(TokenType type_ = None, unsigned int dataLength_ = 0, void* data_ = nullptr);
 	Token(const Token& other);
 	Token& operator=(const Token& rhs);
 	~Token();
@@ -33,4 +35,9 @@ public:
 	TokenType getType();
 	void* getData();
 	unsigned int getDataLength();
+
+	void setType(TokenType type_);
+	void setData(void* data_, unsigned int dataLength_);
+
+	std::string toString();
 };

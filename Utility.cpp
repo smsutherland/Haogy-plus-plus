@@ -5,6 +5,11 @@ bool isWhitespace(char test) {
     return whitespace.find(test) != std::string::npos;
 }
 
+bool isSymbol(char test) {
+    std::string symbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_";
+    return symbols.find(test) != std::string::npos;
+}
+
 void trim(std::string& str) {
     if (str == "")
         return;
